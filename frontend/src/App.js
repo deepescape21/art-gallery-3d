@@ -13,7 +13,8 @@ import Footer from "@/components/portfolio/Footer";
 import AdminLogin from "@/components/admin/AdminLogin";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const BACKEND = (typeof window !== "undefined" && window.location.origin) || process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND}/api`;
 
 function Portfolio() {
   const [artworks, setArtworks] = useState([]);

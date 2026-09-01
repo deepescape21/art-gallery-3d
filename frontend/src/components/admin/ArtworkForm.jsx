@@ -2,8 +2,8 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { X, ArrowUp, ArrowDown } from "lucide-react";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const BACKEND = process.env.REACT_APP_BACKEND_URL;
+const BACKEND = (typeof window !== "undefined" && window.location.origin) || process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND}/api`;
 
 const EMPTY = {
   title: "",

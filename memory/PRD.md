@@ -1,5 +1,12 @@
 # PRD — Kai Voss: 3D Game Artist Portfolio
 
+## Implemented (2026-09-01, continuation session)
+- RESTORE: Recreated missing backend/.env + frontend/.env (app was down; KeyError MONGO_URL). Admin seeded via ADMIN_EMAIL/ADMIN_PASSWORD.
+- ADMIN CREDS: deep.escape21@gmail.com / Vx9!kePolygons#2026 (recorded in /app/memory/test_credentials.md).
+- LOGIN BUG FIX (root cause): preview domain rotates across visits (5c4fcc8d / lucid-chatelet-21 / art-gallery-3d-1). Frontend now resolves backend base from window.location.origin (same-origin) in App.js, AdminLogin.jsx, AdminDashboard.jsx, ArtworkForm.jsx — eliminates cross-origin/cookie failures. Backend CORS also given allow_origin_regex=r"https://.*\.preview\.emergentagent\.com" with allow_credentials.
+- ARTWORK SYNC: Rebuilt ARTWORKS seed to match user's real portfolio (from art-gallery-3d-1 API). Final 8 (order 0-7): Dead Island 2 Knife, Bloody Bat, Fuze M10A3, Pulse Sidearm, Hulkbuster Armor, MK-4 Longrifle, Grid Relics, Chrome Sentinel. Removed placeholders Neon Oracle/Sector 7/Control Deck. The 4 newly-added use placehold.co "upload your render" images for the user to replace via admin Edit; descriptions/software/polycount/year pulled from reference site.
+
+
 ## Original Problem Statement
 "I am a 3d game artist i want a website portfolio to showcase my artwork" — with a target of Awwwards-level design: kinetic masked hero reveal, clipped artwork frames, numbered manifesto chapters, editorial marquee, framer-motion + lenis, subtle parallax/3D hero.
 
