@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import { Pencil, Trash2, Plus, LogOut, ArrowUp, ArrowDown } from "lucide-react";
 import ArtworkForm from "@/components/admin/ArtworkForm";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
-const BACKEND = process.env.REACT_APP_BACKEND_URL;
+const BACKEND = (typeof window !== "undefined" && window.location.origin) || process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND}/api`;
 
 const imgSrc = (image) => (image.startsWith("/api/") ? `${BACKEND}${image}` : image);
 

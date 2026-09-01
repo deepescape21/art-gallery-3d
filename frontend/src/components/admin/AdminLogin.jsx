@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const BACKEND = (typeof window !== "undefined" && window.location.origin) || process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND}/api`;
 
 function formatDetail(detail) {
   if (detail == null) return "Something went wrong. Please try again.";
