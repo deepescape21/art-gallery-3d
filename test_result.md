@@ -211,3 +211,28 @@
 ##     -message: "Round 2 perf fixes (per troubleshoot RCA): removed framer `layout`/`layoutId` from gallery grid+8 cards+images (killed per-frame layout thrashing), removed AnimatePresence mode=popLayout; added loading=lazy decoding=async to gallery + about images, decoding=async fetchPriority=high on hero image; rAF-throttled Hero mousemove. Re-verify scroll longtasks (expect much lower) + visual integrity."
 ##     -agent: "testing"
 ##     -message: "✅ SCROLL PERFORMANCE FIX VERIFIED! Final re-test with exact measurement protocol. PERFORMANCE: Longtask count: 11 (baseline: 10), Total duration: 1673ms (baseline: 2962ms) = 43.5% IMPROVEMENT ✅, Max single longtask: 539ms (baseline: 1312ms) = 59% reduction ✅, ScrollHeight: 7867px. VISUAL INTEGRITY: ✅ 100% PERFECT - Hero (22 embers, POLYGONS cyan glow, hero image), Marquee, Gallery (all 8 artwork cards with lazy loading working), Manifesto, About, Footer, Nav (fixed/readable). REGRESSION CHECK: ✅ PASSED - Artwork modal (pulse-sidearm) opens smoothly with NO flicker, modal image renders correctly, className stable (no layout jump), removal of layoutId from cards did NOT break modal functionality. CONSOLE: No JavaScript errors (only warnings and failed requests for old image URLs, not critical). KEY FIX: Removing framer-motion layout/layoutId from gallery eliminated the per-frame layout thrashing that was causing massive longtasks. Scroll performance is now GOOD (< 2000ms total longtask duration). Bug FIXED and production-ready."
+
+## FRONTEND BUG: Zoom weird on landscape artworks
+##   - task: "Click-to-zoom on landscape artworks"
+##     implemented: true
+##     working: true
+##     file: "frontend/src/components/portfolio/Gallery.jsx"
+##     priority: "high"
+##     needs_retesting: false
+##     stuck_count: 0
+##     status_history:
+##         -working: false
+##         -agent: "user"
+##         -comment: "Clicking/zooming landscape artworks behaves weird."
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Root cause: landscape images use object-contain (letterboxed) but zoom used translate/pan math with transform-origin 0 0 (assumes object-cover fill) -> zoom scaled from top-left corner into empty letterbox = weird/blank. Fix: switched to origin-based zoom (transform-origin follows click/cursor as %, scale only, no translate). Applied to both main modal image and StackImage helper. Works for landscape + portrait."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "✅ VERIFIED: Click-to-zoom bug fix is WORKING PERFECTLY. Comprehensive testing completed on all 4 artworks: (1) PULSE SIDEARM (landscape): zoom IN to scale(2.2) with transform-origin 50% 50% (centered on click), cursor changes zoom-in→zoom-out, pan working (origin updates from 24.95% 25% to 74.95% 75% with mouse movement), image visible (NOT blank), zoom OUT to scale(1) works. (2) MK-4 LONGRIFLE (landscape): identical perfect behavior - scale(2.2), origin 50% 50%, cursor states correct, pan working, image visible, zoom out works. (3) GRID RELICS (landscape): identical perfect behavior - all checks passed. (4) CHROME SENTINEL (portrait - regression check): zoom working correctly with scale(2.2), origin 49.9% 50%, cursor states correct, pan working, no regression. Console: NO JavaScript errors detected. KEY FIX VERIFIED: Origin-based zoom (transform-origin follows click/cursor as %) eliminates the blank-corner weirdness. Landscape artworks now zoom toward the clicked point showing real image content, NOT jumping to empty letterbox. Pan effect works smoothly by updating transform-origin on mouse movement. Bug FIXED and production-ready."
+
+## agent_communication (zoom):
+##     -agent: "main"
+##     -message: "Test click-to-zoom on https://lucid-chatelet-21.preview.emergentagent.com/. Open a LANDSCAPE artwork card data-testid=artwork-card-pulse-sidearm (also try mk4-longrifle, grid-relics). In the modal, click the image (data-testid=artwork-modal-zoom): it should zoom IN toward the clicked point (NOT jump to a blank corner), show actual image content, cursor becomes zoom-out. Move mouse while zoomed: the visible area should pan toward the cursor smoothly. Click again to zoom out. Confirm no blank/empty area shown, no weird jump, works for landscape artworks. Also verify a portrait-ish one (chrome-sentinel) still zooms fine."
+##     -agent: "testing"
+##     -message: "✅ CLICK-TO-ZOOM BUG FIX VERIFIED! Tested all 4 artworks (pulse-sidearm, mk4-longrifle, grid-relics landscape + chrome-sentinel portrait). All checks PASSED: (1) Zoom IN to scale(2.2) centered on click point (transform-origin 50% 50%), (2) Cursor changes zoom-in→zoom-out→zoom-in correctly, (3) Mouse movement pans smoothly (transform-origin updates with cursor position), (4) Image content visible (NO blank corner), (5) Zoom OUT works (scale returns to 1), (6) No console errors. Origin-based zoom fix eliminates blank-corner weirdness on landscape artworks. Production-ready."
