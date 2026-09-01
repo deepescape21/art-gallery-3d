@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv('/app/backend/.env')
 BASE = 'https://integrations.emergentagent.com/objstore/api/v1/storage'
-API = 'https://art-gallery-3d-1.preview.emergentagent.com'
+API = 'https://lucid-chatelet-21.preview.emergentagent.com'
 SKIP = {'0bf1e12a-d8e2-413e-bd7f-c8be3ee55066'}  # damaged knife UV, awaiting re-upload
 
 key = requests.post(f'{BASE}/init', json={'emergent_key': os.environ['EMERGENT_LLM_KEY']}, timeout=30).json()['storage_key']
