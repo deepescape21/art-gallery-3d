@@ -140,3 +140,7 @@
 ##     -message: "Admin login CORS/cookie fix VERIFIED and WORKING. Comprehensive browser test completed successfully. All authentication flows working: login succeeds, cookie is set with correct attributes (secure, httpOnly, sameSite=none), dashboard loads with artworks, session persists after refresh, and no CORS errors in console. The fix is production-ready."
 ##     -agent: "testing"
 ##     -message: "VERIFIED: Admin login works end-to-end. POST /api/auth/login 200, cookie set (Secure/HttpOnly/SameSite=None), redirect to /admin, dashboard lists 7 artworks, /api/auth/me 200 on refresh, no CORS errors. Bug fixed."
+
+## agent_communication (update):
+##     -agent: "main"
+##     -message: "REAL ROOT CAUSE: User browses via https://lucid-chatelet-21.preview.emergentagent.com but REACT_APP_BACKEND_URL was set to a different preview host (5c4fcc8d...), making login a blocked cross-origin request ('Something went wrong'). Fix: set REACT_APP_BACKEND_URL to lucid-chatelet-21 (now same-origin) and added CORS allow_origin_regex for *.preview.emergentagent.com. Verified via real login form at lucid-chatelet-21: POST /api/auth/login same-origin, redirect to /admin, dashboard loads 7 artworks, /api/auth/me 200, no error. FIXED."
