@@ -144,3 +144,31 @@
 ## agent_communication (update):
 ##     -agent: "main"
 ##     -message: "REAL ROOT CAUSE: User browses via https://lucid-chatelet-21.preview.emergentagent.com but REACT_APP_BACKEND_URL was set to a different preview host (5c4fcc8d...), making login a blocked cross-origin request ('Something went wrong'). Fix: set REACT_APP_BACKEND_URL to lucid-chatelet-21 (now same-origin) and added CORS allow_origin_regex for *.preview.emergentagent.com. Verified via real login form at lucid-chatelet-21: POST /api/auth/login same-origin, redirect to /admin, dashboard loads 7 artworks, /api/auth/me 200, no error. FIXED."
+
+## FRONTEND BUG: Artwork modal flicker when navigating images
+##   - task: "Artwork modal image navigation flicker"
+##     implemented: true
+##     working: true
+##     file: "frontend/src/components/portfolio/Gallery.jsx"
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: false
+##         -agent: "user"
+##         -comment: "Clicking horizontal (landscape) artworks / switching from one image to another makes the screen flicker."
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Root cause: landscape state flipped twice per image change (false on click, true on img onLoad) => full modal layout jump; layoutId re-morphed image on src change; onMouseMove ran setPan even when not zoomed. Fix: preload image orientation off-screen (detectLandscape) so modal opens/switches directly into correct layout; set landscape in one step on thumbnail click; removed layoutId from modal image; guarded onMouseMove with if(!zoomed) return. NOTE: pulse-sidearm has TEMP media (2 extra images) added for testing thumbnail navigation."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "VERIFIED: Flicker bug fix is WORKING perfectly. Comprehensive testing completed: (1) PULSE SIDEARM (landscape) opens smoothly with NO layout jump - className stable between initial open and 800ms later, (2) Thumbnail navigation (media-thumb-0/1/2) tested with repeated clicks (0→1→2→1→0) - ALL switches smooth with NO flicker, className remained stable throughout, (3) MK-4 LONGRIFLE (landscape) opens smoothly with NO flicker, (4) CHROME SENTINEL (portrait) opens smoothly with NO flicker, (5) Repeated open/close cycles for PULSE SIDEARM and MK-4 LONGRIFLE - consistent smoothness, NO flicker, (6) Mouse movement over modal image (not zoomed) - NO jitter, (7) Zoom and pan functionality - WORKING correctly. Programmatic flicker detection confirmed: modal inner container className does NOT change after opening or switching images. The detectLandscape() preload fix ensures correct layout is set immediately, preventing the layout jump that was causing flicker. Fix is production-ready."
+
+## agent_communication (flicker):
+##     -agent: "main"
+##     -message: "Test artwork modal on https://lucid-chatelet-21.preview.emergentagent.com/. (1) Open landscape artworks (PULSE SIDEARM, MK-4 LONGRIFLE) from the grid - modal should open smoothly with NO layout jump/flicker. (2) PULSE SIDEARM has 3 thumbnails at bottom of the image (data-testid media-thumb-0/1/2) - click between them repeatedly and confirm NO flicker/layout jump when switching images. (3) Open one artwork, close, open another repeatedly - no flicker. Report smoothness."
+##     -agent: "testing"
+##     -message: "Flicker bug fix VERIFIED and WORKING. All tests passed: (1) Landscape artworks (PULSE SIDEARM, MK-4 LONGRIFLE) open smoothly with NO layout jump - programmatic detection confirms className stable, (2) Thumbnail navigation (0→1→2→1→0) smooth with NO flicker - className remained stable throughout all switches, (3) Portrait artwork (CHROME SENTINEL) opens smoothly, (4) Repeated open/close cycles consistent, (5) Mouse movement (not zoomed) has NO jitter, (6) Zoom/pan working. The detectLandscape() preload ensures modal opens directly into correct layout. Production-ready."
+##     -agent: "testing"
+##     -message: "VERIFIED: No flicker. Modal inner className stable before/after open (no layout jump) for pulse-sidearm & mk4-longrifle; thumbnail nav 0->1->2->1->0 smooth; onMouseMove guard works; zoom/pan works. Fix production-ready."
+##     -agent: "main"
+##     -message: "Cleanup done: removed TEMP media from pulse-sidearm after testing."

@@ -70,9 +70,17 @@ export default function Gallery({ artworks }) {
   const [pan, setPan] = useState({ tx: 0, ty: 0 });
   const ZOOM = 2.2;
 
+  // Detect image orientation off-screen so the modal opens/switches directly
+  // into the correct layout instead of flipping after the image loads (flicker fix).
+  const detectLandscape = (url) => {
+    if (!url) return;
+    const im = new Image();
+    im.onload = () => setLandscape(im.naturalWidth > im.naturalHeight * 0.85);
+    im.src = url;
+  };
+
   useEffect(() => {
     setActiveMedia(0);
-    setLandscape(false);
     setZoomed(false);
   }, [selected]);
 
@@ -136,7 +144,10 @@ export default function Gallery({ artworks }) {
               exit={{ opacity: 0, scale: 0.96 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.8, delay: (i % 3) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              onClick={() => setSelected(art)}
+              onClick={() => {
+                detectLandscape(art.image);
+                setSelected(art);
+              }}
               className={`group relative h-[52vh] overflow-hidden border border-white/10 text-left ${SPANS[i % SPANS.length]}`}
               data-testid={`artwork-card-${art.slug}`}
             >
@@ -266,6 +277,7 @@ export default function Gallery({ artworks }) {
               <div
                 className={`relative overflow-hidden ${landscape ? "h-[42vh] w-full shrink-0 md:h-[60vh]" : "h-[40vh] md:h-[90vh]"}`}
                 onMouseMove={(e) => {
+                  if (!zoomed) return;
                   const r = e.currentTarget.getBoundingClientRect();
                   const fx = (e.clientX - r.left) / r.width;
                   const fy = (e.clientY - r.top) / r.height;
@@ -323,7 +335,6 @@ export default function Gallery({ artworks }) {
                             data-testid="artwork-modal-zoom"
                           >
                             <motion.img
-                              layoutId={`art-img-${selected.slug}`}
                               src={active.url}
                               alt={`${selected.title} — ${active.label}`}
                               onLoad={(e) =>
@@ -349,8 +360,9 @@ export default function Gallery({ artworks }) {
                               key={i}
                               onClick={() => {
                                 setActiveMedia(i);
-                                setLandscape(m.type !== "image");
                                 setZoomed(false);
+                                if (m.type === "image") detectLandscape(m.url);
+                                else setLandscape(true);
                               }}
                               className={`h-14 w-20 shrink-0 overflow-hidden border transition-colors duration-300 ${
                                 i === activeMedia ? "border-[#00F0FF]" : "border-white/20 hover:border-white/60"
