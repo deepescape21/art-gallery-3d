@@ -101,3 +101,42 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+## user_problem_statement: Restore existing 3D game artist portfolio; recreate missing .env; set admin email to deep.escape21@gmail.com; fix admin login not working.
+
+## backend:
+##   - task: "Admin login (CORS/cookie)"
+##     implemented: true
+##     working: true
+##     file: "backend/server.py"
+##     stuck_count: 0
+##     priority: "high"
+##     needs_retesting: false
+##     status_history:
+##         -working: false
+##         -agent: "user"
+##         -comment: "User reports not able to login from browser."
+##         -working: "NA"
+##         -agent: "main"
+##         -comment: "Root cause: FRONTEND_URL was set to * while CORS uses allow_credentials=True, which browsers reject for credentialed requests. Set FRONTEND_URL to exact preview origin. Preflight now returns specific origin + allow-credentials true. Admin creds: deep.escape21@gmail.com / Vx9!kePolygons#2026. Needs browser verification of login flow."
+##         -working: true
+##         -agent: "testing"
+##         -comment: "VERIFIED: Admin login flow working perfectly. Tested with credentials deep.escape21@gmail.com / Vx9!kePolygons#2026. All checks passed: (1) Login form submitted successfully, (2) No error messages displayed, (3) Redirected to /admin dashboard, (4) Dashboard loaded with 7 artworks, (5) access_token cookie set correctly (secure=true, httpOnly=true, sameSite=none), (6) Session persists after page refresh, (7) All API requests return 200 OK (POST /api/auth/login, GET /api/auth/me, GET /api/artworks), (8) No CORS errors in browser console. The CORS/cookie fix is working correctly."
+
+## metadata:
+##   created_by: "main_agent"
+##   version: "1.2"
+##   test_sequence: 2
+
+## test_plan:
+##   current_focus:
+##     - "Admin login (CORS/cookie)"
+##   stuck_tasks: []
+##   test_all: false
+
+## agent_communication:
+##     -agent: "main"
+##     -message: "Please verify admin login at /admin/login using deep.escape21@gmail.com / Vx9!kePolygons#2026. Confirm login succeeds, cookie is set, and it redirects to /admin dashboard (which should load artworks). This is a CORS/cookie fix so must be tested in a real browser, not curl."
+##     -agent: "testing"
+##     -message: "Admin login CORS/cookie fix VERIFIED and WORKING. Comprehensive browser test completed successfully. All authentication flows working: login succeeds, cookie is set with correct attributes (secure, httpOnly, sameSite=none), dashboard loads with artworks, session persists after refresh, and no CORS errors in console. The fix is production-ready."
+##     -agent: "testing"
+##     -message: "VERIFIED: Admin login works end-to-end. POST /api/auth/login 200, cookie set (Secure/HttpOnly/SameSite=None), redirect to /admin, dashboard lists 7 artworks, /api/auth/me 200 on refresh, no CORS errors. Bug fixed."
