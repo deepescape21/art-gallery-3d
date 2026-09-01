@@ -21,7 +21,7 @@ function Portfolio() {
 
   useEffect(() => {
     document.title = "AMAN DEEP — 3D Game Artist";
-    const lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1 });
+    const lenis = new Lenis({ lerp: 0.1, wheelMultiplier: 1 });
     window.__lenis = lenis;
     let frame;
     const raf = (time) => {

@@ -133,11 +133,10 @@ export default function Gallery({ artworks }) {
         </div>
       </div>
 
-      <motion.div layout className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
-        <AnimatePresence mode="popLayout">
+      <motion.div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+        <AnimatePresence>
           {visible.map((art, i) => (
             <motion.button
-              layout
               key={art.slug}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -152,10 +151,11 @@ export default function Gallery({ artworks }) {
               data-testid={`artwork-card-${art.slug}`}
             >
               <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.08]">
-                <motion.img
-                  layoutId={`art-img-${art.slug}`}
+                <img
                   src={art.image}
                   alt={art.title}
+                  loading="lazy"
+                  decoding="async"
                   className={`h-full w-full ${art.fit ? "object-contain p-8" : "object-cover"}`}
                 />
               </div>
