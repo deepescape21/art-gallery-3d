@@ -91,6 +91,7 @@ html.lenis body {
 }
 .animate-marquee {
     animation: marquee-scroll 55s linear infinite;
+    will-change: transform;
 }
 
 @keyframes scanline {
@@ -103,10 +104,40 @@ html.lenis body {
 }
 .animate-scanline {
     animation: scanline 7s linear infinite;
+    will-change: transform;
+}
+
+/* GPU/compositor-driven hero embers (replaces per-frame JS animation) */
+@keyframes ember-rise {
+    0% {
+        transform: translate3d(0, 0, 0);
+        opacity: 0;
+    }
+    15% {
+        opacity: var(--ember-opacity, 0.5);
+    }
+    85% {
+        opacity: var(--ember-opacity, 0.5);
+    }
+    100% {
+        transform: translate3d(0, -110vh, 0);
+        opacity: 0;
+    }
+}
+.ember {
+    position: absolute;
+    bottom: 0;
+    border-radius: 9999px;
+    background: #00f0ff;
+    will-change: transform, opacity;
+    animation-name: ember-rise;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    pointer-events: none;
 }
 
 .neon-glow {
-    filter: drop-shadow(0 0 14px rgba(0, 240, 255, 0.45));
+    text-shadow: 0 0 14px rgba(0, 240, 255, 0.45), 0 0 4px rgba(0, 240, 255, 0.35);
 }
 
 @layer base {

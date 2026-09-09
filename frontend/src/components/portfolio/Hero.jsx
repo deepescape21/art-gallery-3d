@@ -20,7 +20,7 @@ const STATS = [
 ];
 
 const HERO_IMG =
-  "https://images.unsplash.com/photo-1750096319146-6310519b5af2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwzfHxjeWJlcnB1bmslMjAzZCUyMGNoYXJhY3RlciUyMHBvcnRyYWl0fGVufDB8fHx8MTc4Njk0NjkxMnww&ixlib=rb-4.1.0&q=85";
+  "https://images.unsplash.com/photo-1750096319146-6310519b5af2?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAxODF8MHwxfHNlYXJjaHwzfHxjeWJlcnB1bmslMjAzZCUyMGNoYXJhY3RlciUyMHBvcnRyYWl0fGVufDB8fHx8MTc4Njk0NjkxMnww&ixlib=rb-4.1.0&q=80&w=1600";
 
 export default function Hero() {
   const ref = useRef(null);
@@ -51,10 +51,19 @@ export default function Hero() {
     []
   );
 
+  const rafRef = useRef(0);
   const onMouseMove = (e) => {
-    const r = ref.current.getBoundingClientRect();
-    mx.set((e.clientX - r.left) / r.width - 0.5);
-    my.set((e.clientY - r.top) / r.height - 0.5);
+    if (rafRef.current) return;
+    const cx = e.clientX;
+    const cy = e.clientY;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0;
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      mx.set((cx - r.left) / r.width - 0.5);
+      my.set((cy - r.top) / r.height - 0.5);
+    });
   };
 
   return (
@@ -67,17 +76,16 @@ export default function Hero() {
       {/* background gradient + embers */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(0,240,255,0.08),transparent_55%),radial-gradient(ellipse_at_bottom_left,rgba(255,0,60,0.06),transparent_50%)]" />
       {embers.map((e) => (
-        <motion.span
+        <span
           key={e.id}
-          className="absolute bottom-0 rounded-full bg-[#00F0FF]"
-          style={{ left: `${e.left}%`, width: e.size, height: e.size }}
-          initial={{ y: "0vh", opacity: 0 }}
-          animate={{ y: "-110vh", opacity: [0, e.opacity, e.opacity, 0] }}
-          transition={{
-            duration: e.duration,
-            delay: e.delay,
-            repeat: Infinity,
-            ease: "linear",
+          className="ember"
+          style={{
+            left: `${e.left}%`,
+            width: e.size,
+            height: e.size,
+            animationDuration: `${e.duration}s`,
+            animationDelay: `${e.delay}s`,
+            "--ember-opacity": e.opacity,
           }}
         />
       ))}
@@ -85,11 +93,11 @@ export default function Hero() {
       {/* clipped artwork frame with parallax */}
       <motion.div
         style={{ y: bgY }}
-        className="absolute right-0 top-0 hidden h-full w-[42vw] lg:block"
+        className="absolute right-0 top-0 hidden h-full w-[42vw] will-change-transform lg:block"
       >
         <motion.div
           style={{ x: frameX, y: frameY }}
-          className="relative mt-[10vh] h-[80vh] w-full overflow-hidden"
+          className="relative mt-[10vh] h-[80vh] w-full overflow-hidden will-change-transform"
           initial={{ clipPath: "polygon(100% 0, 100% 0, 100% 100%, 100% 100%)" }}
           animate={{ clipPath: "polygon(12% 0, 100% 0, 100% 100%, 0 100%)" }}
           transition={{ duration: 1.4, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
@@ -97,6 +105,8 @@ export default function Hero() {
           <img
             src={HERO_IMG}
             alt="Neon Oracle — featured character artwork"
+            decoding="async"
+            fetchPriority="high"
             className="h-full w-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/30" />
@@ -105,7 +115,7 @@ export default function Hero() {
       </motion.div>
 
       {/* kinetic headline */}
-      <motion.div style={{ y: textY }} className="relative z-10 px-6 pb-10 md:px-12">
+      <motion.div style={{ y: textY }} className="relative z-10 px-6 pb-10 will-change-transform md:px-12">
         <div className="overflow-hidden">
           <motion.p
             initial={{ y: "110%" }}

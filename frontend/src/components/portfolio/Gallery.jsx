@@ -5,20 +5,25 @@ import MarmosetViewer from "@/components/portfolio/MarmosetViewer";
 
 function StackImage({ src, alt, testId }) {
   const [zoomed, setZoomed] = useState(false);
-  const [pan, setPan] = useState({ tx: 0, ty: 0 });
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const Z = 2.2;
   return (
     <div
       className={`relative overflow-hidden ${zoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
-      onClick={() => setZoomed((z) => !z)}
-      onMouseMove={(e) => {
+      onClick={(e) => {
         const r = e.currentTarget.getBoundingClientRect();
-        const fx = (e.clientX - r.left) / r.width;
-        const fy = (e.clientY - r.top) / r.height;
-        const clamp = (v, min) => Math.min(0, Math.max(min, v));
-        setPan({
-          tx: clamp(r.width / 2 - Z * fx * r.width, r.width * (1 - Z)),
-          ty: clamp(r.height / 2 - Z * fy * r.height, r.height * (1 - Z)),
+        setOrigin({
+          x: ((e.clientX - r.left) / r.width) * 100,
+          y: ((e.clientY - r.top) / r.height) * 100,
+        });
+        setZoomed((z) => !z);
+      }}
+      onMouseMove={(e) => {
+        if (!zoomed) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        setOrigin({
+          x: Math.max(0, Math.min(100, ((e.clientX - r.left) / r.width) * 100)),
+          y: Math.max(0, Math.min(100, ((e.clientY - r.top) / r.height) * 100)),
         });
       }}
       data-testid={testId}
@@ -26,10 +31,12 @@ function StackImage({ src, alt, testId }) {
       <img
         src={src}
         alt={alt}
+        loading="lazy"
+        decoding="async"
         className="block w-full transition-transform duration-300 ease-out"
         style={{
-          transform: zoomed ? `translate(${pan.tx}px, ${pan.ty}px) scale(${Z})` : "scale(1)",
-          transformOrigin: "0 0",
+          transform: zoomed ? `scale(${Z})` : "scale(1)",
+          transformOrigin: `${origin.x}% ${origin.y}%`,
         }}
       />
     </div>
@@ -67,12 +74,20 @@ export default function Gallery({ artworks }) {
   const [activeMedia, setActiveMedia] = useState(0);
   const [landscape, setLandscape] = useState(false);
   const [zoomed, setZoomed] = useState(false);
-  const [pan, setPan] = useState({ tx: 0, ty: 0 });
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
   const ZOOM = 2.2;
+
+  // Detect image orientation off-screen so the modal opens/switches directly
+  // into the correct layout instead of flipping after the image loads (flicker fix).
+  const detectLandscape = (url) => {
+    if (!url) return;
+    const im = new Image();
+    im.onload = () => setLandscape(im.naturalWidth > im.naturalHeight * 0.85);
+    im.src = url;
+  };
 
   useEffect(() => {
     setActiveMedia(0);
-    setLandscape(false);
     setZoomed(false);
   }, [selected]);
 
@@ -125,26 +140,29 @@ export default function Gallery({ artworks }) {
         </div>
       </div>
 
-      <motion.div layout className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
-        <AnimatePresence mode="popLayout">
+      <motion.div className="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+        <AnimatePresence>
           {visible.map((art, i) => (
             <motion.button
-              layout
               key={art.slug}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96 }}
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.8, delay: (i % 3) * 0.08, ease: [0.16, 1, 0.3, 1] }}
-              onClick={() => setSelected(art)}
+              onClick={() => {
+                detectLandscape(art.image);
+                setSelected(art);
+              }}
               className={`group relative h-[52vh] overflow-hidden border border-white/10 text-left ${SPANS[i % SPANS.length]}`}
               data-testid={`artwork-card-${art.slug}`}
             >
               <div className="h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.08]">
-                <motion.img
-                  layoutId={`art-img-${art.slug}`}
+                <img
                   src={art.image}
                   alt={art.title}
+                  loading="lazy"
+                  decoding="async"
                   className={`h-full w-full ${art.fit ? "object-contain p-8" : "object-cover"}`}
                 />
               </div>
@@ -266,13 +284,13 @@ export default function Gallery({ artworks }) {
               <div
                 className={`relative overflow-hidden ${landscape ? "h-[42vh] w-full shrink-0 md:h-[60vh]" : "h-[40vh] md:h-[90vh]"}`}
                 onMouseMove={(e) => {
+                  if (!zoomed) return;
                   const r = e.currentTarget.getBoundingClientRect();
-                  const fx = (e.clientX - r.left) / r.width;
-                  const fy = (e.clientY - r.top) / r.height;
-                  const clamp = (v, min) => Math.min(0, Math.max(min, v));
-                  setPan({
-                    tx: clamp(r.width / 2 - ZOOM * fx * r.width, r.width * (1 - ZOOM)),
-                    ty: clamp(r.height / 2 - ZOOM * fy * r.height, r.height * (1 - ZOOM)),
+                  const ox = ((e.clientX - r.left) / r.width) * 100;
+                  const oy = ((e.clientY - r.top) / r.height) * 100;
+                  setOrigin({
+                    x: Math.max(0, Math.min(100, ox)),
+                    y: Math.max(0, Math.min(100, oy)),
                   });
                 }}
               >
@@ -310,20 +328,24 @@ export default function Gallery({ artworks }) {
                             />
                           )}
                           <div
-                            onClick={() => setZoomed((z) => !z)}
+                            onClick={(e) => {
+                              const r = e.currentTarget.getBoundingClientRect();
+                              setOrigin({
+                                x: ((e.clientX - r.left) / r.width) * 100,
+                                y: ((e.clientY - r.top) / r.height) * 100,
+                              });
+                              setZoomed((z) => !z);
+                            }}
                             className={`h-full w-full transition-transform duration-300 ease-out ${
                               zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
                             }`}
                             style={{
-                              transform: zoomed
-                                ? `translate(${pan.tx}px, ${pan.ty}px) scale(${ZOOM})`
-                                : "scale(1)",
-                              transformOrigin: "0 0",
+                              transform: zoomed ? `scale(${ZOOM})` : "scale(1)",
+                              transformOrigin: `${origin.x}% ${origin.y}%`,
                             }}
                             data-testid="artwork-modal-zoom"
                           >
                             <motion.img
-                              layoutId={`art-img-${selected.slug}`}
                               src={active.url}
                               alt={`${selected.title} — ${active.label}`}
                               onLoad={(e) =>
@@ -349,8 +371,9 @@ export default function Gallery({ artworks }) {
                               key={i}
                               onClick={() => {
                                 setActiveMedia(i);
-                                setLandscape(m.type !== "image");
                                 setZoomed(false);
+                                if (m.type === "image") detectLandscape(m.url);
+                                else setLandscape(true);
                               }}
                               className={`h-14 w-20 shrink-0 overflow-hidden border transition-colors duration-300 ${
                                 i === activeMedia ? "border-[#00F0FF]" : "border-white/20 hover:border-white/60"

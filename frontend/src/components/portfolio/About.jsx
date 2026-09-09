@@ -40,6 +40,8 @@ export default function About() {
               <img
                 src={PORTRAIT}
                 alt="Aman Deep — featured artwork"
+                loading="lazy"
+                decoding="async"
                 className="h-[60vh] w-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/80 via-transparent to-transparent" />
