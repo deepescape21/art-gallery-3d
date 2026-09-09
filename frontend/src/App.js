@@ -24,12 +24,15 @@ function Portfolio() {
     const lenis = new Lenis({ lerp: 0.08, wheelMultiplier: 1 });
     window.__lenis = lenis;
     let frame;
+    let active = true;
     const raf = (time) => {
+      if (!active) return;
       lenis.raf(time);
       frame = requestAnimationFrame(raf);
     };
     frame = requestAnimationFrame(raf);
     return () => {
+      active = false;
       cancelAnimationFrame(frame);
       lenis.destroy();
       window.__lenis = null;
